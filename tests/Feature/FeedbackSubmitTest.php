@@ -16,10 +16,15 @@ class FeedbackSubmitTest extends TestCase
     {
         Storage::fake('public');
         $dest = Destination::factory()->create(['is_active' => true]);
+        $cat = \App\Models\FeedbackCategory::create([
+            'name' => 'Apresiasi',
+            'slug' => 'apresiasi',
+            'is_active' => true
+        ]);
 
         $res = $this->post('/feedbacks', [
             'destination_id' => $dest->id,
-            'category' => 'apresiasi',
+            'feedback_category_id' => $cat->id,
             'rating' => 5,
             'title' => 'Mantap',
             'content' => 'Sangat bagus',
@@ -29,4 +34,3 @@ class FeedbackSubmitTest extends TestCase
         $res->assertRedirect(route('thanks'));
     }
 }
-
