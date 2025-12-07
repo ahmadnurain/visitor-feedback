@@ -37,6 +37,9 @@ class DatabaseSeeder extends Seeder
             Destination::factory()->count(5)->create();
         }
 
+        // Seed feedback categories
+        $this->call(FeedbackCategorySeeder::class);
+
         // Seed feedback contoh
         Feedback::factory(20)->create();
     }
