@@ -23,24 +23,20 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'full_name' => 'Administrator',
-                'password' => Hash::make('ChangeMe!123'),
+                'password' => Hash::make('admin123'),
                 'role' => 'admin',
             ]
         );
 
-        // Seed kategori & destinasi contoh (minimal)
-        if (Category::count() === 0) {
-            Category::factory()->count(3)->create();
-        }
 
-        if (Destination::count() === 0) {
-            Destination::factory()->count(5)->create();
-        }
+
+        // Seed real categories & destinations
+        $this->call(DestinationSeeder::class);
 
         // Seed feedback categories
         $this->call(FeedbackCategorySeeder::class);
 
         // Seed feedback contoh
-        Feedback::factory(20)->create();
+        $this->call(FeedbackSeeder::class);
     }
 }

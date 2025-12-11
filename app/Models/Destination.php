@@ -18,6 +18,7 @@ class Destination extends Model
         'name',
         'slug',
         'address',
+        'description',
         'latitude',
         'longitude',
         'banner_path',

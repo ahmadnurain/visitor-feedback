@@ -16,11 +16,21 @@ class FeedbackStats extends BaseWidget
 
     protected function getStats(): array
     {
-        $total = Feedback::count();
-        $baru = Feedback::where('status', 'new')->count();
-        $diproses = Feedback::where('status', 'processing')->count();
-        $selesai = Feedback::where('status', 'resolved')->count();
-        $avgRating = round((float) Feedback::whereNotNull('rating')->avg('rating'), 2);
+        $stats = Feedback::query()
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'new' THEN 1 ELSE 0 END) as baru,
+                SUM(CASE WHEN status = 'processing' THEN 1 ELSE 0 END) as diproses,
+                SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) as selesai,
+                AVG(rating) as avg_rating
+            ")
+            ->first();
+
+        $total = $stats->total ?? 0;
+        $baru = $stats->baru ?? 0;
+        $diproses = $stats->diproses ?? 0;
+        $selesai = $stats->selesai ?? 0;
+        $avgRating = round((float) ($stats->avg_rating ?? 0), 2);
 
         return [
             Stat::make('Total Feedback', number_format($total))

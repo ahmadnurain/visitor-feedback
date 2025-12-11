@@ -58,8 +58,7 @@
           <div class="bg-white dark:bg-slate-900 rounded-[2rem] p-6 md:p-8 shadow-xl border border-slate-100 dark:border-slate-800 animate-slide-up" style="animation-delay: 0.2s;">
             <h2 class="font-serif text-2xl font-bold text-slate-900 dark:text-white mb-4">Tentang Destinasi</h2>
             <p class="text-slate-600 dark:text-slate-300 leading-relaxed text-base md:text-lg">
-              Selamat datang di {{ $destination->name }}. Tempat ini menawarkan pengalaman wisata yang unik di Majalengka. 
-              Kami berkomitmen untuk terus meningkatkan kualitas layanan dan fasilitas. Masukan Anda sangat berarti bagi pengembangan berkelanjutan destinasi ini.
+              {{ $destination->description ?? 'Selamat datang di ' . $destination->name . '. Tempat ini menawarkan pengalaman wisata yang unik di Majalengka. Kami berkomitmen untuk terus meningkatkan kualitas layanan dan fasilitas. Masukan Anda sangat berarti bagi pengembangan berkelanjutan destinasi ini.' }}
             </p>
             
             <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
