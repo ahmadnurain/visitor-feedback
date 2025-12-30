@@ -16,13 +16,13 @@ class StoreFeedbackRequest extends FormRequest
         return [
             'destination_id' => ['required', 'exists:destinations,id'],
             'feedback_category_id' => ['required', 'exists:feedback_categories,id'],
-            'visitor_name' => ['nullable', 'string', 'max:100'],
+            'visitor_name' => ['nullable', 'string', 'max:50'],
             'rating' => ['nullable', 'integer', 'between:1,5'],
             'title' => ['required', 'string', 'max:150'],
             'content' => ['required', 'string', 'max:5000'],
-            'contact_email' => ['nullable', 'email'],
-            'contact_phone' => ['nullable', 'string', 'max:30'],
-            'attachments.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
+            'contact_email' => ['nullable', 'email', 'max:50'],
+            'contact_phone' => ['nullable', 'string', 'max:14', 'regex:/^[0-9]+$/'],
+            'attachments.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ];
     }
 }

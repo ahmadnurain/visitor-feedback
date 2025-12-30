@@ -50,7 +50,14 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('feedbacks', function (Blueprint $table) {
-            //
+            $table->dropForeign(['feedback_category_id']);
+            $table->dropForeign(['processed_by']);
+            $table->dropColumn(['feedback_category_id', 'visitor_name', 'channel', 'action_taken', 'processed_by', 'status']);
+        });
+
+        Schema::table('feedbacks', function (Blueprint $table) {
+            $table->enum('category', ['keluhan', 'saran', 'apresiasi'])->after('user_id');
+            $table->enum('status', ['baru', 'diproses', 'selesai', 'ditolak'])->default('baru')->after('attachments');
         });
     }
 };

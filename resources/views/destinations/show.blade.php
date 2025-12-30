@@ -109,18 +109,34 @@
                 </div>
               @endif
 
-              <form action="{{ route('feedbacks.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5 relative z-10">
+              <form action="{{ route('feedbacks.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5 relative z-10"
+                x-data="{ 
+                    rating: 0, 
+                    files: [],
+                    fileCheckError: false,
+                    handleFileSelect(event) {
+                        const uploaded = Array.from(event.target.files);
+                        this.files = uploaded.map(file => ({
+                            name: file.name,
+                            url: URL.createObjectURL(file),
+                            size: file.size,
+                            invalid: file.size > 5242880 // 5MB in bytes
+                        }));
+                        
+                        this.fileCheckError = this.files.some(f => f.invalid);
+                    }
+                }">
                 @csrf
                 <input type="hidden" name="destination_id" value="{{ $destination->id }}">
 
                 <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Nama Pengunjung (Opsional)</label>
-                  <input type="text" name="visitor_name" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all" placeholder="Nama Anda">
+                  <input type="text" name="visitor_name" maxlength="50" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all" placeholder="Nama Anda (Maks. 50 Karakter)">
                 </div>
 
                 <div>
                   <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Rating</label>
-                  <div class="flex gap-2" x-data="{ rating: 0 }">
+                  <div class="flex gap-2">
                     <input type="hidden" name="rating" :value="rating">
                     <template x-for="i in 5">
                       <button type="button" @click="rating = i" class="focus:outline-none transition-transform hover:scale-110">
@@ -147,22 +163,78 @@
                 </div>
 
                 <div>
-                  <input type="text" name="title" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all" placeholder="Judul Singkat">
+                  <input type="text" name="title" required maxlength="100" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all" placeholder="Judul Singkat (Maks. 100 Karakter)">
                 </div>
 
                 <div>
-                  <textarea name="content" rows="4" required class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all resize-none" placeholder="Ceritakan pengalaman Anda..."></textarea>
+                  <textarea name="content" rows="4" required maxlength="5000" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all resize-none" placeholder="Ceritakan pengalaman Anda..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Foto Dokumentasi (Opsional)</label>
+                    
+                    {{-- Error message area --}}
+                    <div x-show="fileCheckError" class="mb-3 p-3 rounded-lg bg-red-50 border border-red-200 text-red-600 text-xs font-bold flex items-center gap-2 animate-pulse">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        Ukuran file tidak boleh lebih dari 5 MB!
+                    </div>
+
+                    <div class="relative group w-full min-h-[120px] rounded-xl border-2 border-dashed transition-all overflow-hidden"
+                         :class="fileCheckError ? 'border-red-300 bg-red-50/50' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 hover:border-brand-400'">
+                        
+                        {{-- Input File Overlay --}}
+                        <input type="file" name="attachments[]" multiple accept="image/png, image/jpeg, image/webp" 
+                            @change="handleFileSelect($event)"
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-50">
+                        
+                        <div x-show="files.length === 0" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 pointer-events-none transition-opacity duration-300">
+                            <svg class="w-8 h-8 text-slate-400 mb-2 group-hover:scale-110 transition-transform" :class="fileCheckError ? 'text-red-400' : 'text-slate-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p class="text-sm font-medium transition-colors" :class="fileCheckError ? 'text-red-500' : 'text-slate-600 dark:text-slate-300 group-hover:text-brand-500'">
+                                Klik untuk upload foto
+                            </p>
+                            <p class="text-xs mt-1" :class="fileCheckError ? 'text-red-400' : 'text-slate-400'">Maks. 5 file (JPG, PNG)</p>
+                        </div>
+
+                        {{-- Image Previews (Adaptive Grid) --}}
+                        <div x-show="files.length > 0" 
+                             class="relative z-10 w-full h-full p-2 grid gap-2"
+                             :class="{
+                                'grid-cols-1': files.length === 1,
+                                'grid-cols-2': files.length === 2,
+                                'grid-cols-3': files.length >= 3
+                             }">
+                            <template x-for="(file, index) in files" :key="index">
+                                <div class="relative rounded-lg overflow-hidden group/img shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+                                     :class="files.length === 1 ? 'aspect-video' : 'aspect-square'">
+                                    
+                                    <img :src="file.url" class="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-110" :alt="file.name">
+                                    
+                                    {{-- Hover Overlay --}}
+                                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-2 text-center pointer-events-none">
+                                        <svg class="w-5 h-5 text-white mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                        <span class="text-[10px] font-bold text-white uppercase tracking-wider truncate w-full" x-text="file.name"></span>
+                                        <span class="text-[9px] text-slate-300">Ganti File</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
                   <p class="text-xs text-slate-400 mb-3">Kontak (Opsional)</p>
                   <div class="grid grid-cols-2 gap-3">
-                    <input type="email" name="contact_email" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="Email">
-                    <input type="tel" name="contact_phone" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="No. HP">
+                    <input type="email" name="contact_email" maxlength="50" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="Email (Maks. 50 Karakter)">
+                    <input type="tel" name="contact_phone" maxlength="14" x-on:input="$el.value = $el.value.replace(/[^0-9]/g, '').slice(0, 14)" class="w-full px-4 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="No. HP (08xxx)">
                   </div>
                 </div>
 
-                <button type="submit" class="w-full py-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold shadow-lg shadow-brand-500/30 hover:shadow-brand-500/50 hover:-translate-y-0.5 transition-all duration-200">
+                <button type="submit" 
+                        :disabled="fileCheckError"
+                        :class="fileCheckError ? 'bg-slate-300 cursor-not-allowed text-slate-500' : 'bg-brand-600 hover:bg-brand-700 text-white shadow-brand-500/30 hover:shadow-brand-500/50 hover:-translate-y-0.5'"
+                        class="w-full py-4 rounded-xl font-bold shadow-lg transition-all duration-200">
                   Kirim Ulasan
                 </button>
               </form>
