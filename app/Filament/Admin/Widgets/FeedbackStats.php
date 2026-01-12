@@ -44,7 +44,7 @@ class FeedbackStats extends BaseWidget
                 ->icon('heroicon-o-queue-list'),
 
             Stat::make('Selesai', number_format($selesai))
-                ->description('Tiket diselesaikan')
+                ->description('Masukan diselesaikan')
                 ->color('success')
                 ->icon('heroicon-o-check-badge'),
 
